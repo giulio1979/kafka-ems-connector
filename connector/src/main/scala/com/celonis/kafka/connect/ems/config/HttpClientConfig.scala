@@ -121,12 +121,14 @@ case class ProxiedHttpClientConfig(
     new Proxy(proxyType.javaProxyType, proxyAddr)
   }
 
-  override def customiseHttpClient(builder: OkHttpClient.Builder): OkHttpClient.Builder =
+  override def customiseHttpClient(builder: OkHttpClient.Builder): OkHttpClient.Builder = {
+    builder.proxy(createProxyServer())
     authentication match {
       case Some(auth) if javaProxyType == JavaProxyType.HTTP  => configureHttpProxyAuth(builder, auth)
       case Some(auth) if javaProxyType == JavaProxyType.SOCKS => configureSocksProxyAuth(auth); builder
       case _                                                  => builder
     }
+  }
 
   private def configureSocksProxyAuth(auth: BasicAuthentication): Unit =
     JavaAuthenticator.setDefault(
